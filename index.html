@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mis calorías</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#0E7A5F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Calorías">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap">
+<style>
+:root{--bg:#EEF3F1;--surface:#FFFFFF;--ink:#13261F;--muted:#5C6F68;--line:#D3DED9;--accent:#0E7A5F;--over:#C2410C;--track:#DCE7E2;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1815;--surface:#16231F;--ink:#E7F1ED;--muted:#93A8A0;--line:#25382F;--accent:#3DD6A6;--over:#FB923C;--track:#22332D;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0E1815;--surface:#16231F;--ink:#E7F1ED;--muted:#93A8A0;--line:#25382F;--accent:#3DD6A6;--over:#FB923C;--track:#22332D;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.4}
+main{max-width:480px;margin:0 auto;padding:20px 16px 48px}
+.day{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.day h1{font-size:1.05rem;font-weight:600;margin:0;text-transform:capitalize}
+button{font:inherit;cursor:pointer}
+.nav{background:none;border:1px solid var(--line);color:var(--ink);width:40px;height:40px;border-radius:50%;font-size:1.1rem}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.ring{position:relative;width:240px;height:240px;margin:12px auto 4px}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:16;stroke-linecap:round}
+.ring .t{stroke:var(--track)}
+.ring .p{stroke:var(--accent);transition:stroke-dashoffset .5s ease,stroke .3s}
+.ring.over .p{stroke:var(--over)}
+.mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.mid b{font-size:3.4rem;font-weight:800;line-height:1}
+.mid span{color:var(--muted);font-size:.95rem;margin-top:4px}
+.goal{text-align:center;color:var(--muted);font-size:.9rem;margin-bottom:20px}
+.goal button{background:none;border:0;color:var(--accent);font-weight:600;padding:4px;text-decoration:underline}
+.add{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.add .full{grid-column:1/-1}
+.add input[readonly]{opacity:.75}
+.hint{grid-column:1/-1;font-size:.85rem;color:var(--muted);min-height:1.2em}
+.hint b{color:var(--ink)}
+.item .n small{display:block;color:var(--muted);font-size:.8rem}
+.src{margin-top:28px;font-size:.8rem;color:var(--muted)}
+.src a{color:var(--accent)}
+.add input,.add select{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px 12px}
+.add .go{background:var(--accent);color:var(--bg);border:0;border-radius:10px;font-weight:700}
+.meal{margin-top:22px}
+.meal h2{display:flex;justify-content:space-between;font-size:1rem;margin:0 0 6px;font-weight:600}
+.meal h2 span{color:var(--muted);font-weight:400}
+.item{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.item .n{flex:1}
+.item .k{font-weight:600}
+.item .x{background:none;border:0;color:var(--muted);font-size:1.2rem;width:32px;height:32px}
+.empty{color:var(--muted);font-size:.9rem;padding:8px 0;border-top:1px solid var(--line)}
+.event{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:18px;text-align:center}
+.event h2{margin:0 0 8px;font-size:1.25rem;font-weight:800}
+.cd{display:flex;justify-content:center;gap:22px}
+.cd div{display:flex;flex-direction:column;align-items:center;min-width:64px}
+.cd b{font-size:2.4rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.cd span{color:var(--muted);font-size:.85rem}
+.evl{display:block;margin-top:12px;color:var(--muted);font-size:.85rem}
+.evl input{display:block;margin:6px auto 0;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+#cdNote{margin:8px 0 0;color:var(--accent);font-weight:600;font-size:.9rem;min-height:1em}
+.cal{margin-top:28px}
+.calh{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.calh h2{margin:0;font-size:1.05rem;font-weight:600;text-transform:capitalize}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.grid .wd{text-align:center;font-size:.75rem;color:var(--muted);padding:4px 0}
+.grid .c{aspect-ratio:1;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:2px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:.9rem;font-weight:600}
+.grid .c small{font-size:.62rem;font-weight:400;color:var(--muted)}
+.grid .c.ok{background:color-mix(in srgb,var(--accent) 22%,transparent)}
+.grid .c.over{background:color-mix(in srgb,var(--over) 26%,transparent)}
+.grid .c.today{border-color:var(--ink)}
+.grid .c.sel{outline:3px solid var(--accent);outline-offset:1px}
+.grid .c.ev::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--over)}
+.grid .e{visibility:hidden}
+.legend{color:var(--muted);font-size:.8rem;margin:10px 0 0}
+.row{display:flex;gap:8px}
+.sec{flex:1;background:none;border:1px solid var(--accent);color:var(--accent);border-radius:10px;padding:10px;font-weight:600}
+.panel{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px}
+.panel[hidden],#scanbox[hidden],#results[hidden]{display:none}
+#vid{width:100%;max-height:280px;border-radius:8px;background:#000;object-fit:cover}
+.res{display:block;width:100%;text-align:left;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:6px}
+.res small{display:block;color:var(--muted)}
+.close{background:none;border:0;color:var(--muted);text-decoration:underline;padding:6px 0}
+.src{margin-top:28px;font-size:.8rem;color:var(--muted)}
+.src a{color:var(--accent)}
+@media (prefers-reduced-motion:reduce){.ring .p{transition:none}}
+</style>
+</head>
+<body>
+<main>
+  <section class="event" aria-label="Cuenta regresiva">
+    <h2>Nacional Wrestling</h2>
+    <div class="cd"><div><b id="cdD">--</b><span>días</span></div><div><b id="cdH">--</b><span>horas</span></div><div><b id="cdM">--</b><span>minutos</span></div></div>
+    <p id="cdNote"></p>
+    <label class="evl">Fecha y hora del evento<input type="datetime-local" id="evDate"></label>
+  </section>
+  <div class="day">
+    <button class="nav" id="prev" aria-label="Día anterior">‹</button>
+    <h1 id="dateLabel"></h1>
+    <button class="nav" id="next" aria-label="Día siguiente">›</button>
+  </div>
+
+  <div class="ring" id="ring">
+    <svg viewBox="0 0 120 120" aria-hidden="true">
+      <circle class="t" cx="60" cy="60" r="52"/>
+      <circle class="p" id="arc" cx="60" cy="60" r="52"/>
+    </svg>
+    <div class="mid"><b id="left">0</b><span id="leftLabel">kcal restantes</span></div>
+  </div>
+  <div class="goal"><span id="eaten">0</span> consumidas de <span id="goalTxt">1500</span> kcal · <button id="editGoal">Cambiar meta</button></div>
+
+  <div class="add">
+    <input class="full" id="name" list="foods" placeholder="Alimento (elegí de la lista o escribí otro)" autocomplete="off" aria-label="Alimento">
+    <div class="full row"><button type="button" class="sec" id="btnSearch">Buscar online</button><button type="button" class="sec" id="btnScan">Escanear código</button></div>
+    <input id="grams" type="number" inputmode="decimal" min="1" placeholder="Gramos" aria-label="Gramos">
+    <input id="k100" type="number" inputmode="decimal" min="0" placeholder="kcal por 100 g" aria-label="Calorías por 100 gramos">
+    <select id="meal" aria-label="Comida">
+      <option>Desayuno</option><option>Almuerzo</option><option>Merienda</option><option>Cena</option><option>Snack</option>
+    </select>
+    <button class="go" id="addBtn">Agregar</button>
+    <div class="hint" id="hint">Pesá el alimento y poné los gramos. Si no está en la lista, copiá las kcal por 100 g de la etiqueta del envase.</div>
+    <div class="full panel" id="panel" hidden>
+      <div id="scanbox" hidden><video id="vid" playsinline muted></video><div class="hint">Apuntá al código de barras del envase.</div></div>
+      <div id="results" hidden></div>
+      <button type="button" class="close" id="closePanel">Cerrar</button>
+    </div>
+    <datalist id="foods"></datalist>
+  </div>
+<div id="list"></div>
+
+  <section class="cal" aria-label="Calendario">
+    <div class="calh"><button class="nav" id="cprev" aria-label="Mes anterior">‹</button><h2 id="cmonth"></h2><button class="nav" id="cnext" aria-label="Mes siguiente">›</button></div>
+    <div class="grid" id="cgrid"></div>
+    <p class="legend">Verde: dentro de la meta. Naranja: te pasaste. El punto marca el evento. Tocá un día para ver o editar su registro.</p>
+    <p class="legend" id="csum"></p>
+  </section>
+<p class="src">Alimentos de la lista: USDA FoodData Central (<a href="https://fdc.nal.usda.gov" target="_blank" rel="noopener">fdc.nal.usda.gov</a>, SR Legacy); los marcados con ✓ fueron contrastados con su registro. Búsqueda online: Open Food Facts (base colaborativa, puede tener errores) y, si cargás una clave gratuita, USDA FoodData Central. Para productos envasados, la etiqueta del envase es la fuente más precisa. Es una referencia, no un consejo médico ni nutricional. <button type="button" class="close" id="usdaKey">Configurar clave USDA</button></p>
+</main>
+
+<script>
+const FOODS={
+"Arroz blanco cocido":{k:130,src:"USDA FDC 168878",v:1},
+"Fideos / pasta cocidos (enriquecidos)":{k:158,src:"USDA FDC 169737",v:1},
+"Banana cruda":{k:89,src:"USDA FDC 173944",v:1},
+"Manzana cruda con piel":{k:52,src:"USDA SR Legacy",v:0},
+"Huevo entero cocido":{k:155,src:"USDA SR Legacy",v:0},
+"Leche entera":{k:61,src:"USDA SR Legacy",v:0},
+"Pechuga de pollo cocida sin piel":{k:165,src:"USDA SR Legacy",v:0},
+"Papa hervida":{k:87,src:"USDA SR Legacy",v:0},
+"Pan blanco":{k:265,src:"USDA SR Legacy",v:0},
+"Palta":{k:160,src:"USDA SR Legacy",v:0},
+"Lentejas cocidas":{k:116,src:"USDA SR Legacy",v:0},
+"Avena arrollada (seca)":{k:379,src:"USDA SR Legacy",v:0}};
+const MEALS=["Desayuno","Almuerzo","Merienda","Cena","Snack"];
+const C=2*Math.PI*52;
+let state={goal:1500,days:{}};
+let current=new Date();
+
+try{const s=localStorage.getItem("calorias:v1");if(s){const p=JSON.parse(s);if(p&&p.days)state=p;if(state.goal===2000)state.goal=1500;}}catch(e){}
+function save(){try{localStorage.setItem("calorias:v1",JSON.stringify(state));}catch(e){}}
+const key=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const $=id=>document.getElementById(id);
+const entries=()=>state.days[key(current)]||[];
+
+const dl=$("foods");
+Object.keys(FOODS).forEach(f=>{const o=document.createElement("option");o.value=f;dl.appendChild(o);});
+const num=v=>{const n=parseFloat(String(v).replace(",","."));return isNaN(n)?NaN:n;};
+function preview(){
+  const f=FOODS[$("name").value];const k=$("k100");
+  if(f){k.value=f.k;k.readOnly=true;}else{if(k.readOnly){k.value="";}k.readOnly=false;}
+  const g=num($("grams").value),k1=num(k.value),h=$("hint");
+  const pk=(picked&&picked.name===$("name").value)?picked:null;const src=f?f.src+(f.v?" ✓":" (por confirmar)"):(pk?pk.src:"etiqueta del envase");
+  if(g>0&&k1>=0){h.innerHTML="<b>"+Math.round(g*k1/100)+" kcal</b> · "+g+" g × "+k1+" kcal/100 g · fuente: "+src;}
+  else{h.textContent="Pesá el alimento y poné los gramos. Si no está en la lista, copiá las kcal por 100 g de la etiqueta del envase.";}
+}
+["name","grams","k100"].forEach(id=>$(id).addEventListener("input",preview));
+
+function render(){
+  const list=entries();
+  const total=list.reduce((s,i)=>s+i.kcal,0);
+  const left=state.goal-total;
+  const today=key(new Date())===key(current);
+  $("dateLabel").textContent=today?"Hoy":current.toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long"});
+  $("next").disabled=today;$("next").style.opacity=today?.3:1;
+  $("left").textContent=Math.abs(left);
+  $("leftLabel").textContent=left>=0?"kcal restantes":"kcal de más";
+  $("ring").classList.toggle("over",left<0);
+  $("eaten").textContent=total;$("goalTxt").textContent=state.goal;
+  const pct=Math.min(total/state.goal,1);
+  const arc=$("arc");arc.style.strokeDasharray=C;arc.style.strokeDashoffset=C*(1-pct);
+  const box=$("list");box.innerHTML="";
+  MEALS.forEach(m=>{
+    const items=list.filter(i=>i.meal===m);
+    const sec=document.createElement("section");sec.className="meal";
+    const sub=items.reduce((s,i)=>s+i.kcal,0);
+    const h=document.createElement("h2");h.innerHTML="<div></div><span></span>";
+    h.firstChild.textContent=m;h.lastChild.textContent=sub+" kcal";
+    sec.appendChild(h);
+    if(!items.length){const e=document.createElement("div");e.className="empty";e.textContent="Todavía no agregaste nada.";sec.appendChild(e);}
+    items.forEach(i=>{
+      const r=document.createElement("div");r.className="item";
+      const n=document.createElement("div");n.className="n";n.textContent=i.name;if(i.grams){const sm=document.createElement("small");sm.textContent=i.grams+" g · "+i.k100+" kcal/100 g · "+i.src;n.appendChild(sm);}
+      const k=document.createElement("div");k.className="k";k.textContent=i.kcal+" kcal";
+      const x=document.createElement("button");x.className="x";x.textContent="×";x.setAttribute("aria-label","Borrar "+i.name);
+      x.onclick=()=>{state.days[key(current)]=entries().filter(e=>e.id!==i.id);save();render();};
+      r.append(n,k,x);sec.appendChild(r);
+    });
+    box.appendChild(sec);
+  });
+  viewM=null;renderCal();
+}
+
+let viewM=null;
+function baseM(){return viewM||new Date(current.getFullYear(),current.getMonth(),1);}
+function renderCal(){
+  const b=baseM(),y=b.getFullYear(),m=b.getMonth();
+  $("cmonth").textContent=b.toLocaleDateString("es-AR",{month:"long",year:"numeric"});
+  const g=$("cgrid");g.innerHTML="";
+  ["Lu","Ma","Mi","Ju","Vi","Sa","Do"].forEach(w=>{const d=document.createElement("div");d.className="wd";d.textContent=w;g.appendChild(d);});
+  const lead=(new Date(y,m,1).getDay()+6)%7,n=new Date(y,m+1,0).getDate();
+  for(let i=0;i<lead;i++){const e=document.createElement("div");e.className="e";g.appendChild(e);}
+  let days=0,sum=0;
+  const todayK=key(new Date()),curK=key(current),evK=state.event?state.event.slice(0,10):"";
+  for(let d=1;d<=n;d++){
+    const k=y+"-"+String(m+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");
+    const list=state.days[k]||[],tot=list.reduce((s,i)=>s+i.kcal,0);
+    const c=document.createElement("button");c.className="c";
+    if(list.length){c.classList.add(tot>state.goal?"over":"ok");days++;sum+=tot;}
+    if(k===todayK)c.classList.add("today");
+    if(k===curK)c.classList.add("sel");
+    if(k===evK)c.classList.add("ev");
+    c.innerHTML="<span></span>"+(list.length?"<small></small>":"");
+    c.firstChild.textContent=d;if(list.length)c.lastChild.textContent=tot;
+    c.setAttribute("aria-label",d+" de "+b.toLocaleDateString("es-AR",{month:"long"})+(list.length?": "+tot+" kcal":": sin registros")+(k===evK?", Nacional Wrestling":""));
+    c.onclick=()=>{current=new Date(y,m,d);render();window.scrollTo({top:0,behavior:"smooth"});};
+    g.appendChild(c);
+  }
+  $("csum").textContent=days?("Este mes: "+days+(days===1?" día registrado":" días registrados")+", promedio "+Math.round(sum/days)+" kcal por día."):"Este mes todavía no hay días registrados.";
+}
+$("cprev").onclick=()=>{const b=baseM();viewM=new Date(b.getFullYear(),b.getMonth()-1,1);renderCal();};
+$("cnext").onclick=()=>{const b=baseM();viewM=new Date(b.getFullYear(),b.getMonth()+1,1);renderCal();};
+
+function tick(){
+  const e=state.event,z=v=>$(v);
+  if(!e){z("cdD").textContent=z("cdH").textContent=z("cdM").textContent="--";z("cdNote").textContent="Elegí la fecha y hora del evento para empezar la cuenta.";return;}
+  const ms=new Date(e)-new Date();
+  if(ms<=0){z("cdD").textContent=z("cdH").textContent=z("cdM").textContent="0";z("cdNote").textContent="El evento ya empezó o terminó.";return;}
+  const mins=Math.floor(ms/60000);
+  z("cdD").textContent=Math.floor(mins/1440);z("cdH").textContent=Math.floor((mins%1440)/60);z("cdM").textContent=mins%60;z("cdNote").textContent="";
+}
+$("evDate").addEventListener("change",ev=>{state.event=ev.target.value||null;save();tick();renderCal();});
+
+$("addBtn").onclick=()=>{
+  const name=$("name").value.trim();const grams=num($("grams").value);const k100=num($("k100").value);
+  if(!name){$("name").focus();return;}
+  if(!(grams>0)){$("grams").focus();return;}
+  if(isNaN(k100)||k100<0){$("k100").focus();return;}
+  const f=FOODS[name];
+  const pk=(picked&&picked.name===name)?picked:null;
+  if(pendingCode&&!pk&&!f){state.products=state.products||{};state.products[pendingCode]={name,k100};}
+  pendingCode=null;
+  const k=key(current);
+  (state.days[k]=state.days[k]||[]).push({id:Date.now()+Math.random(),name,grams,k100,kcal:Math.round(grams*k100/100),meal:$("meal").value,src:f?f.src:(pk?pk.src:"Etiqueta del envase")});
+  picked=null;save();["name","grams","k100"].forEach(id=>$(id).value="");$("k100").readOnly=false;preview();$("name").focus();render();
+};
+["name","grams","k100"].forEach(id=>$(id).addEventListener("keydown",e=>{if(e.key==="Enter")$("addBtn").click();}));
+let picked=null,pendingCode=null,stream=null,timer=null,reader=null;
+const vid=$("vid");
+function note(t){$("hint").textContent=t;}
+function kcalOff(n){const v=n&&n["energy-kcal_100g"];return typeof v==="number"?Math.round(v):null;}
+function kcalUsda(f){const m={};(f.foodNutrients||[]).forEach(n=>{const id=n.nutrientId||(n.nutrient&&n.nutrient.id);const v=n.value!==undefined?n.value:n.amount;if(id!==undefined&&typeof v==="number")m[id]=v;});const v=m[1008]!==undefined?m[1008]:(m[2047]!==undefined?m[2047]:m[2048]);return v===undefined?null:Math.round(v);}
+async function searchOnline(){
+  const q=$("name").value.trim();if(!q){$("name").focus();return;}
+  stopScan();$("panel").hidden=false;$("scanbox").hidden=true;const r=$("results");r.hidden=false;r.textContent="Buscando…";
+  const jobs=[fetch("https://world.openfoodfacts.org/cgi/search.pl?search_terms="+encodeURIComponent(q)+"&search_simple=1&action=process&json=1&page_size=8&fields=code,product_name,brands,nutriments").then(x=>x.json()).then(d=>(d.products||[]).map(p=>({name:[p.product_name,p.brands].filter(Boolean).join(" · "),k:kcalOff(p.nutriments),src:"Open Food Facts "+p.code})))];
+  if(state.usdaKey)jobs.push(fetch("https://api.nal.usda.gov/fdc/v1/foods/search?query="+encodeURIComponent(q)+"&dataType=Foundation,SR%20Legacy&pageSize=8&api_key="+encodeURIComponent(state.usdaKey)).then(x=>x.json()).then(d=>(d.foods||[]).map(f=>({name:f.description,k:kcalUsda(f),src:"USDA FDC "+f.fdcId}))));
+  const out=await Promise.allSettled(jobs);
+  const items=out.filter(o=>o.status==="fulfilled").flatMap(o=>o.value).filter(i=>i.name&&i.k!==null);
+  r.textContent="";
+  if(!items.length){r.textContent=out.every(o=>o.status==="rejected")?"No se pudo conectar. Revisá tu internet o cargá las kcal de la etiqueta.":"Sin resultados con kcal. Probá otro nombre o cargá las kcal de la etiqueta.";return;}
+  items.forEach(i=>{const b=document.createElement("button");b.type="button";b.className="res";b.textContent=i.name;const sm=document.createElement("small");sm.textContent=i.k+" kcal/100 g · "+i.src;b.appendChild(sm);b.onclick=()=>pick(i);r.appendChild(b);});
+}
+function pick(i){picked={name:i.name,k:i.k,src:i.src};$("name").value=i.name;$("k100").readOnly=false;$("k100").value=i.k;$("panel").hidden=true;$("grams").focus();preview();}
+async function onCode(code){
+  const loc=state.products&&state.products[code];
+  if(loc){pick({name:loc.name,k:loc.k100,src:"Guardado por vos (código "+code+")"});return;}
+  $("panel").hidden=false;$("results").hidden=false;$("results").textContent="Buscando código "+code+"…";
+  try{
+    const d=await fetch("https://world.openfoodfacts.org/api/v2/product/"+encodeURIComponent(code)+".json?fields=product_name,brands,nutriments").then(x=>x.json());
+    const p=d.product,k=p&&kcalOff(p.nutriments);
+    if(p&&k!==null){pick({name:[p.product_name,p.brands].filter(Boolean).join(" · ")||code,k,src:"Open Food Facts "+code});return;}
+  }catch(e){}
+  $("panel").hidden=true;pendingCode=code;$("name").focus();note("Código "+code+" sin datos. Escribí el nombre y las kcal por 100 g de la etiqueta; queda guardado para la próxima.");
+}
+function loadZX(){return new Promise((ok,no)=>{if(window.ZXing)return ok();const s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js";s.onload=ok;s.onerror=no;document.head.appendChild(s);});}
+async function startScan(){
+  $("panel").hidden=false;$("results").hidden=true;$("scanbox").hidden=false;
+  try{
+    if("BarcodeDetector" in window){
+      const det=new BarcodeDetector({formats:["ean_13","ean_8","upc_a","upc_e"]});
+      stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});
+      vid.srcObject=stream;await vid.play();
+      timer=setInterval(async()=>{try{const r=await det.detect(vid);if(r.length){const c=r[0].rawValue;stopScan();onCode(c);}}catch(e){}},350);
+    }else{
+      await loadZX();reader=new ZXing.BrowserMultiFormatReader();
+      await reader.decodeFromConstraints({video:{facingMode:"environment"}},vid,res=>{if(res){const c=res.getText();stopScan();onCode(c);}});
+    }
+  }catch(e){stopScan();$("panel").hidden=true;note("No se pudo usar la cámara. Revisá el permiso en Ajustes y que la página use HTTPS.");}
+}
+function stopScan(){clearInterval(timer);timer=null;if(reader){try{reader.reset();}catch(e){}reader=null;}if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}vid.srcObject=null;$("scanbox").hidden=true;}
+$("btnSearch").onclick=searchOnline;$("btnScan").onclick=startScan;
+$("closePanel").onclick=()=>{stopScan();$("panel").hidden=true;};
+$("usdaKey").onclick=()=>{const v=prompt("Pegá tu clave gratuita de USDA FoodData Central (api.data.gov). Dejala vacía para quitarla.",state.usdaKey||"");if(v!==null){state.usdaKey=v.trim()||null;save();}};
+$("editGoal").onclick=()=>{
+  const v=prompt("¿Cuántas kcal por día querés consumir?",state.goal);
+  const n=parseInt(v,10);if(n>0){state.goal=n;save();render();}
+};
+$("prev").onclick=()=>{current=new Date(current.getFullYear(),current.getMonth(),current.getDate()-1);render();};
+$("next").onclick=()=>{current=new Date(current.getFullYear(),current.getMonth(),current.getDate()+1);render();};
+render();$("evDate").value=state.event||"";tick();setInterval(tick,15000);
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
