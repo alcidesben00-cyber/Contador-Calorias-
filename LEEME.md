@@ -15,3 +15,4 @@ Pedí una clave gratuita en https://fdc.nal.usda.gov/api-key.html y pegala en la
 ## Notas
 - Los datos quedan guardados en el dispositivo (no se sincronizan).
 - La búsqueda online y el escáner necesitan internet. La cámara solo funciona con HTTPS.
+
